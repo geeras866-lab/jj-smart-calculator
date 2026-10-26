@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JJ Calculator</title>
+<style>
+  :root {
+    --bg-main: #141a29;
+    --card-bg: #141a29;
+    --input-bg: #101522;
+    --accent-pink: #ff2a7a;
+    --accent-cyan: #00f0ff;
+    --text-main: #ffffff;
+    --text-muted: #8c9bb5;
+    --border-color: rgba(255, 255, 255, 0.05);
+    
+    --nm-shadow-out: 6px 6px 14px #0b0e17, -6px -6px 14px #1d263b;
+    --nm-shadow-in: inset 4px 4px 8px #0b0e17, inset -4px -4px 8px #1d263b;
+    --nm-btn-bg: #141a29;
+    --btn-num-text: #ffffff;
+  }
+
+  body.light-mode {
+    --bg-main: #e6ecf5;
+    --card-bg: #e6ecf5;
+    --input-bg: #dde4ef;
+    --accent-pink: #e11d48;
+    --accent-cyan: #0284c7;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: rgba(0, 0, 0, 0.05);
+    
+    --nm-shadow-out: 6px 6px 12px #c5cbd4, -6px -6px 12px #ffffff;
+    --nm-shadow-in: inset 4px 4px 8px #c5cbd4, inset -4px -4px 8px #ffffff;
+    --nm-btn-bg: #e6ecf5;
+    --btn-num-text: #1e293b;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .header {
+    height: 54px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border-color);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Original Neon JJ Logo */
+  .brand-logo {
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+    color: #fff;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 4px 9px;
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(255, 42, 122, 0.5), 0 0 20px rgba(0, 240, 255, 0.3);
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
+  }
+  .brand-name {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--text-main);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .download-badge {
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 240, 255, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.15s ease;
+  }
+  .download-badge:active {
+    transform: scale(0.95);
+  }
+
+  .theme-toggle-btn {
+    background: var(--nm-btn-bg);
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: var(--nm-shadow-out);
+    color: var(--text-main);
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .screen {
+    display: none;
+    height: 100%;
+    width: 100%;
+    flex-direction: column;
+  }
+  .screen.active {
+    display: flex;
+  }
+
+  /* 3D Neumorphic Keypad */
+  #basic-calc {
+    padding: 16px 18px;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+  #basic-calc.active {
+    display: flex;
+  }
+
+  .calc-display {
+    background: var(--nm-btn-bg);
+    border-radius: 22px;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    min-height: 130px;
+    margin-bottom: 18px;
+    box-shadow: var(--nm-shadow-in);
+  }
+  .history-text {
+    font-size: 16px;
+    color: var(--text-muted);
+    min-height: 22px;
+  }
+  .current-text {
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--text-main);
+    overflow-x: auto;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  .keypad-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 14px;
+    margin-top: auto;
+    padding-bottom: 8px;
+  }
+
+  .btn {
+    border: 1px solid transparent;
+    border-radius: 20px;
+    height: 62px;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--btn-num-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--nm-btn-bg);
+    box-shadow: var(--nm-shadow-out);
+    cursor: pointer;
+    transition: all 0.12s ease-in-out;
+    outline: none;
+  }
+
+  .btn:active {
+    transform: scale(0.96);
+    background: var(--nm-btn-bg);
+    box-shadow: var(--nm-shadow-in), 0 0 16px rgba(0, 240, 255, 0.75), 0 0 32px rgba(0, 240, 255, 0.35);
+    border: 1px solid rgba(0, 240, 255, 0.85);
+    color: var(--accent-cyan);
+  }
+
+  .btn-fn {
+    color: var(--accent-pink);
+    font-size: 20px;
+  }
+  .btn-fn:active {
+    box-shadow: var(--nm-shadow-in), 0 0 16px rgba(255, 42, 122, 0.8), 0 0 32px rgba(255, 42, 122, 0.4);
+    border: 1px solid rgba(255, 42, 122, 0.9);
+    color: var(--accent-pink);
+  }
+
+  .btn-op {
+    color: var(--accent-cyan);
+    font-size: 24px;
+  }
+  .btn-op:active {
+    box-shadow: var(--nm-shadow-in), 0 0 20px rgba(0, 240, 255, 0.85), 0 0 40px rgba(0, 240, 255, 0.45);
+    border: 1px solid #00f0ff;
+  }
+
+  .btn-equal {
+    grid-column: span 2;
+    background: linear-gradient(135deg, var(--accent-pink), #9333ea);
+    color: #ffffff;
+    font-size: 28px;
+    box-shadow: 0 4px 15px rgba(255, 42, 122, 0.4);
+  }
+  .btn-equal:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 25px rgba(255, 42, 122, 0.9), 0 0 45px rgba(147, 51, 234, 0.7);
+    border: 1px solid #ff2a7a;
+  }
+
+  .tool-panel {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .card {
+    background: var(--nm-btn-bg);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: var(--nm-shadow-out);
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent-pink);
+    margin-bottom: 12px;
+  }
+  .field-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .input-box {
+    width: 100%;
+    background: var(--input-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 16px;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    outline: none;
+    box-shadow: var(--nm-shadow-in);
+  }
+
+  .date-picker-row {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1.3fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .date-select {
+    background: var(--input-bg);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 8px;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+    box-shadow: var(--nm-shadow-in);
+  }
+  .date-select option {
+    background: var(--bg-main);
+    color: var(--text-main);
+  }
+
+  .submit-btn {
+    width: 100%;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 42, 122, 0.3);
+  }
+  .submit-btn:active {
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4);
+  }
+  .result-box {
+    margin-top: 14px;
+    padding: 14px;
+    background: var(--input-bg);
+    border-radius: 14px;
+    box-shadow: var(--nm-shadow-in);
+    font-size: 14px;
+    line-height: 1.7;
+    display: none;
+    border-left: 4px solid var(--accent-cyan);
+  }
+
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+  }
+  .lang-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    margin-top: 10px;
+  }
+  .lang-btn {
+    padding: 12px 8px;
+    background: var(--nm-btn-bg);
+    border: none;
+    border-radius: 12px;
+    color: var(--btn-num-text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--nm-shadow-out);
+  }
+  .lang-btn:active {
+    box-shadow: var(--nm-shadow-in);
+  }
+  .lang-btn.active {
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 42, 122, 0.35);
+  }
+
+  .bottom-nav {
+    height: 60px;
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    flex: 1;
+    text-align: center;
+  }
+  .nav-item span.icon {
+    font-size: 18px;
+  }
+  .nav-item.active {
+    color: var(--accent-pink);
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top Header with Direct APK Download Button -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-logo" id="jj-logo">JJ</div>
+      <div class="brand-name">CALCULATOR</div>
+    </div>
+    
+    <div class="header-actions">
+      <a href="https://github.com/geeras866-lab/jj-smart-calculator/releases/download/v1.0.0/JJ-Smart-Calculator.apk" download class="download-badge">
+        <span>📲</span>
+        <span>APK</span>
+      </a>
+      <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Theme">🌙</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    
+    <!-- 1. Basic Calc -->
+    <div id="basic-calc" class="screen active">
+      <div class="calc-display">
+        <div class="history-text" id="calc-history"></div>
+        <div class="current-text" id="calc-result">0</div>
+      </div>
+      <div class="keypad-grid">
+        <button class="btn btn-fn" onclick="clearCalc()">AC</button>
+        <button class="btn btn-fn" onclick="backspace()">⌫</button>
+        <button class="btn btn-op" onclick="appendOp('%')">%</button>
+        <button class="btn btn-op" onclick="appendOp('/')">÷</button>
+
+        <button class="btn" onclick="appendNum('7')">7</button>
+        <button class="btn" onclick="appendNum('8')">8</button>
+        <button class="btn" onclick="appendNum('9')">9</button>
+        <button class="btn btn-op" onclick="appendOp('*')">×</button>
+
+        <button class="btn" onclick="appendNum('4')">4</button>
+        <button class="btn" onclick="appendNum('5')">5</button>
+        <button class="btn" onclick="appendNum('6')">6</button>
+        <button class="btn btn-op" onclick="appendOp('-')">−</button>
+
+        <button class="btn" onclick="appendNum('1')">1</button>
+        <button class="btn" onclick="appendNum('2')">2</button>
+        <button class="btn" onclick="appendNum('3')">3</button>
+        <button class="btn btn-op" onclick="appendOp('+')">+</button>
+
+        <button class="btn" onclick="appendNum('0')">0</button>
+        <button class="btn" onclick="appendNum('.')">.</button>
+        <button class="btn btn-equal" onclick="calculateResult()">=</button>
+      </div>
+    </div>
+
+    <!-- 2. Vaddi Screen -->
+    <div id="vaddi-screen" class="screen">
+      <div class="tool-panel">
+        <div class="card">
+          <div class="card-title" data-i18n="vaddi_title">Simple Interest (Village / Vaddi)</div>
+          
+          <div class="field-label" data-i18n="vaddi_p">Principal Amount (₹)</div>
+          <input type="number" id="v-amount" class="input-box" placeholder="100000">
+
+          <div class="field-label" data-i18n="vaddi_r">Rate per Month (₹ per 100)</div>
+          <input type="number" id="v-rate" class="input-box" placeholder="2.00">
+
+          <div class="field-label" data-i18n="start_date">Start Date (ఇచ్చిన తేదీ)</div>
+          <div class="date-picker-row">
+            <select id="start-day" class="date-select"></select>
+            <select id="start-month" class="date-select" onchange="updateDays('start')"></select>
+            <select id="start-year" class="date-select" onchange="updateDays('start')"></select>
+          </div>
+
+          <div class="field-label" data-i18n="end_date">End Date (ముగింపు తేదీ)</div>
+          <div class="date-picker-row">
+            <select id="end-day" class="date-select"></select>
+            <select id="end-month" class="date-select" onchange="updateDays('end')"></select>
+            <select id="end-year" class="date-select" onchange="updateDays('end')"></select>
+          </div>
+
+          <button class="submit-btn" onclick="calcVaddi()" data-i18n="btn_calc">Calculate</button>
+          <div class="result-box" id="v-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. EMI Screen -->
+    <div id="emi-screen" class="screen">
+      <div class="tool-panel">
+        <div class="card">
+          <div class="card-title" data-i18n="emi_title">Loan EMI Calculator</div>
+          <div class="field-label" data-i18n="emi_p">Loan Amount (₹)</div>
+          <input type="number" id="emi-amount" class="input-box" placeholder="1000000">
+          <div class="field-label" data-i18n="emi_r">Annual Interest Rate (%)</div>
+          <input type="number" id="emi-rate" class="input-box" placeholder="8.5">
+          <div class="field-label" data-i18n="emi_t">Tenure (Months)</div>
+          <input type="number" id="emi-months" class="input-box" placeholder="36">
+          <button class="submit-btn" onclick="calcEMI()" data-i18n="btn_calc">Calculate</button>
+          <div class="result-box" id="emi-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Land Screen -->
+    <div id="land-screen" class="screen">
+      <div class="tool-panel">
+        <div class="card">
+          <div class="card-title" data-i18n="land_title">Land Area Converter</div>
+          <div class="field-label" data-i18n="land_val">Enter Area</div>
+          <input type="number" id="land-val" class="input-box" placeholder="1">
+          <div class="field-label" data-i18n="land_unit">Select Unit</div>
+          <select id="land-unit" class="input-box">
+            <option value="acres" data-i18n="opt_acres">Acres (ఎకరాలు)</option>
+            <option value="guntas" data-i18n="opt_guntas">Guntas (గుంటలు)</option>
+            <option value="sqyards" data-i18n="opt_sqyards">Sq. Yards (గజాలు)</option>
+          </select>
+          <button class="submit-btn" onclick="convertLand()" data-i18n="btn_convert">Convert</button>
+          <div class="result-box" id="land-result"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Settings Screen -->
+    <div id="settings-screen" class="screen">
+      <div class="tool-panel">
+        <div class="card">
+          <div class="card-title">Mobile App</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Download 100% offline Android App directly to your device.</p>
+          <a href="https://github.com/geeras866-lab/jj-smart-calculator/releases/download/v1.0.0/JJ-Smart-Calculator.apk" download class="submit-btn" style="text-align: center; text-decoration: none; display: block;">📥 Download APK (v1.0.0)</a>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="theme_title">Theme Mode</div>
+          <div class="setting-row">
+            <span style="font-size: 14px;" data-i18n="theme_label">Switch Day / Night</span>
+            <button class="lang-btn" style="padding: 8px 16px;" onclick="toggleTheme()" id="theme-toggle-label">Day Mode ☀️</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="settings_title">App Settings</div>
+          <div class="field-label" data-i18n="select_lang">Choose App Language</div>
+          <div class="lang-grid">
+            <button class="lang-btn" id="btn-en" onclick="setLang('en')">English</button>
+            <button class="lang-btn" id="btn-te" onclick="setLang('te')">తెలుగు</button>
+            <button class="lang-btn" id="btn-hi" onclick="setLang('hi')">हिन्दी</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="about_title">About JJ Calculator</div>
+          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;" data-i18n="about_desc">
+            All-in-one smart calculator with accurate village interest, loan EMI, unit conversion, and multi-language support.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="switchTab('basic-calc', this)">
+      <span class="icon">🔢</span>
+      <span data-i18n="nav_basic">Basic</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('vaddi-screen', this)">
+      <span class="icon">🪙</span>
+      <span data-i18n="nav_vaddi">Interest</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('emi-screen', this)">
+      <span class="icon">🏦</span>
+      <span data-i18n="nav_emi">EMI</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('land-screen', this)">
+      <span class="icon">📐</span>
+      <span data-i18n="nav_land">Land</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('settings-screen', this)">
+      <span class="icon">⚙️</span>
+      <span data-i18n="nav_settings">Settings</span>
+    </div>
+  </div>
+
+  <script>
+    const flashGradients = [
+      { bg: "linear-gradient(135deg, #00f0ff, #0072ff)", shadow: "0 0 20px #00f0ff, 0 0 35px #0072ff" },
+      { bg: "linear-gradient(135deg, #00ff87, #60efff)", shadow: "0 0 20px #00ff87, 0 0 35px #60efff" },
+      { bg: "linear-gradient(135deg, #ff007f, #ffbf00)", shadow: "0 0 20px #ff007f, 0 0 35px #ffbf00" },
+      { bg: "linear-gradient(135deg, #a855f7, #ec4899)", shadow: "0 0 20px #a855f7, 0 0 35px #ec4899" },
+      { bg: "linear-gradient(135deg, #facc15, #f97316)", shadow: "0 0 20px #facc15, 0 0 35px #f97316" }
+    ];
+
+    let flashTimer = null;
+    let flashIdx = 0;
+
+    function flashJJLogo() {
+      const logo = document.getElementById('jj-logo');
+      if (!logo) return;
+
+      if (flashTimer) clearTimeout(flashTimer);
+
+      flashIdx = (flashIdx + 1) % flashGradients.length;
+      logo.style.background = flashGradients[flashIdx].bg;
+      logo.style.boxShadow = flashGradients[flashIdx].shadow;
+      logo.style.transform = "scale(1.12)";
+
+      flashTimer = setTimeout(() => {
+        logo.style.background = "linear-gradient(135deg, var(--accent-pink), var(--accent-cyan))";
+        logo.style.boxShadow = "0 0 12px rgba(255, 42, 122, 0.5), 0 0 20px rgba(0, 240, 255, 0.3)";
+        logo.style.transform = "scale(1)";
+      }, 220);
+    }
+
+    let currentTheme = localStorage.getItem('app_theme') || 'night';
+
+    function applyTheme() {
+      const body = document.body;
+      const themeBtn = document.getElementById('theme-btn');
+      const themeToggleLabel = document.getElementById('theme-toggle-label');
+
+      if (currentTheme === 'day') {
+        body.classList.add('light-mode');
+        if (themeBtn) themeBtn.innerText = '☀️';
+        if (themeToggleLabel) themeToggleLabel.innerText = 'Night Mode 🌙';
+      } else {
+        body.classList.remove('light-mode');
+        if (themeBtn) themeBtn.innerText = '🌙';
+        if (themeToggleLabel) themeToggleLabel.innerText = 'Day Mode ☀️';
+      }
+      localStorage.setItem('app_theme', currentTheme);
+    }
+
+    function toggleTheme() {
+      currentTheme = currentTheme === 'night' ? 'day' : 'night';
+      applyTheme();
+    }
+
+    const i18n = {
+      en: {
+        theme_title: "Appearance",
+        theme_label: "Display Theme",
+        vaddi_title: "Village Interest Calculator",
+        vaddi_p: "Principal Amount (₹)",
+        vaddi_r: "Monthly Interest (₹ per 100)",
+        start_date: "Start Date (ఇచ్చిన తేదీ)",
+        end_date: "End Date (ముగింపు తేదీ)",
+        btn_calc: "Calculate",
+        emi_title: "Bank Loan EMI Calculator",
+        emi_p: "Loan Amount (₹)",
+        emi_r: "Annual Interest Rate (%)",
+        emi_t: "Tenure (Months)",
+        land_title: "Land Area Converter",
+        land_val: "Enter Area Value",
+        land_unit: "Select Unit",
+        btn_convert: "Convert Area",
+        opt_acres: "Acres",
+        opt_guntas: "Guntas",
+        opt_sqyards: "Sq. Yards",
+        settings_title: "App Settings",
+        select_lang: "Choose App Language",
+        about_title: "About JJ Calculator",
+        about_desc: "All-in-one smart calculator with accurate village interest, loan EMI, unit conversion, and multi-language support.",
+        nav_basic: "Basic",
+        nav_vaddi: "Interest",
+        nav_emi: "EMI",
+        nav_land: "Land",
+        nav_settings: "Settings"
+      },
+      te: {
+        theme_title: "రూపురేఖలు (Theme)",
+        theme_label: "స్క్రీన్ థీమ్",
+        vaddi_title: "తెలుగు గ్రామీణ వడ్డీ లెక్క",
+        vaddi_p: "అసలు మొత్తం (₹)",
+        vaddi_r: "నూరు రూపాయలకు నెలకు వడ్డీ (₹)",
+        start_date: "ఇచ్చిన తేదీ",
+        end_date: "ముగింపు తేదీ",
+        btn_calc: "వడ్డీ లెక్కించు",
+        emi_title: "బ్యాంక్ EMI కాలిక్యులేటర్",
+        emi_p: "రుణ మొత్తం (₹)",
+        emi_r: "సంవత్సర వడ్డీ రేటు (%)",
+        emi_t: "వ్యవధి (నెలలలో)",
+        land_title: "భూమి కొలతలు (Land Converter)",
+        land_val: "విస్తీర్ణం నమోదు చేయండి",
+        land_unit: "కొలత రకం ఎంచుకోండి",
+        btn_convert: "మార్పిడి చేయండి",
+        opt_acres: "ఎకరాలు (Acres)",
+        opt_guntas: "గుంటలు (Guntas)",
+        opt_sqyards: "గజాలు (Sq. Yards)",
+        settings_title: "యాప్ సెట్టింగ్స్",
+        select_lang: "భాషను ఎంచుకోండి",
+        about_title: "JJ Calculator గురించి",
+        about_desc: "గ్రామీణ వడ్డీ లెక్కలు, బ్యాంక్ EMI, భూమి కొలతలు మరియు మల్టీ-లాంగ్వేజ్ సపోర్ట్ ఉన్న ఆఫ్‌లైన్ యాప్.",
+        nav_basic: "బేసిక్",
+        nav_vaddi: "వడ్డీ",
+        nav_emi: "EMI",
+        nav_land: "భూమి",
+        nav_settings: "సెట్టింగ్స్"
+      },
+      hi: {
+        theme_title: "थीम मोड",
+        theme_label: "डिस्प्ले थीम",
+        vaddi_title: "देसी ब्याज कैलकुलेटर",
+        vaddi_p: "मूलधन (₹)",
+        vaddi_r: "मासिक ब्याज दर (₹ प्रति ₹100)",
+        start_date: "प्रारंभ तिथि",
+        end_date: "समाप्ति तिथि",
+        btn_calc: "गणना करें",
+        emi_title: "बैंक ऋण ईएमआई कैलकुलेटर",
+        emi_p: "ऋण राशि (₹)",
+        emi_r: "वार्षिक ब्याज दर (%)",
+        emi_t: "अवधि (महीने)",
+        land_title: "भूमि क्षेत्रफल परिवर्तक",
+        land_val: "क्षेत्रफल दर्ज करें",
+        land_unit: "इकाई चुनें",
+        btn_convert: "परिवर्तित करें",
+        opt_acres: "एकड़ (Acres)",
+        opt_guntas: "गुंटा (Guntas)",
+        opt_sqyards: "गज (Sq. Yards)",
+        settings_title: "ऐप सेटिंग्स",
+        select_lang: "भाषा चुनें",
+        about_title: "JJ Calculator के बारे में",
+        about_desc: "देसी ब्याज, बैंक ईएमआई और भूमि मापन वाला ऑल-इन-वन ऑफलाइन कैलकुलेटर।",
+        nav_basic: "कैलकुलेटर",
+        nav_vaddi: "ब्याज",
+        nav_emi: "ईएमआई",
+        nav_land: "भूमि",
+        nav_settings: "सेटिंग्स"
+      }
+    };
+
+    let currentLang = localStorage.getItem('app_lang') || 'te';
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('app_lang', lang);
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + lang);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[lang] && i18n[lang][key]) {
+          el.innerText = i18n[lang][key];
+        }
+      });
+    }
+
+    const monthsNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    function getDaysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function updateDays(prefix) {
+      const daySel = document.getElementById(prefix + '-day');
+      const monthSel = document.getElementById(prefix + '-month');
+      const yearSel = document.getElementById(prefix + '-year');
+
+      const y = parseInt(yearSel.value);
+      const m = parseInt(monthSel.value);
+      const prevSelectedDay = parseInt(daySel.value) || 1;
+
+      const totalDays = getDaysInMonth(y, m);
+      daySel.innerHTML = '';
+      for (let i = 1; i <= totalDays; i++) {
+        daySel.innerHTML += `<option value="${i}" ${i === Math.min(prevSelectedDay, totalDays) ? 'selected' : ''}>${i < 10 ? '0' + i : i}</option>`;
+      }
+    }
+
+    function initDateDropdowns() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+
+      function setupDropdown(prefix, defaultD, defaultM, defaultY) {
+        const monthSel = document.getElementById(prefix + '-month');
+        const yearSel = document.getElementById(prefix + '-year');
+
+        monthSel.innerHTML = '';
+        for (let i = 0; i < 12; i++) {
+          monthSel.innerHTML += `<option value="${i}" ${i === defaultM ? 'selected' : ''}>${monthsNames[i]}</option>`;
+        }
+
+        yearSel.innerHTML = '';
+        for (let y = currentYear - 30; y <= currentYear + 10; y++) {
+          yearSel.innerHTML += `<option value="${y}" ${y === defaultY ? 'selected' : ''}>${y}</option>`;
+        }
+
+        updateDays(prefix);
+        document.getElementById(prefix + '-day').value = defaultD;
+      }
+
+      setupDropdown('start', today.getDate(), today.getMonth(), currentYear - 1);
+      setupDropdown('end', today.getDate(), today.getMonth(), currentYear);
+    }
+
+    function switchTab(screenId, element) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      element.classList.add('active');
+    }
+
+    let curVal = '0';
+    let historyVal = '';
+    let shouldReset = false;
+
+    function updateCalc() {
+      document.getElementById('calc-result').innerText = curVal;
+      document.getElementById('calc-history').innerText = historyVal;
+    }
+
+    function appendNum(n) {
+      flashJJLogo();
+      if (shouldReset) {
+        curVal = '';
+        shouldReset = false;
+      }
+      if (curVal === '0' && n !== '.') curVal = '';
+      if (n === '.' && curVal.includes('.')) return;
+      curVal += n;
+      updateCalc();
+    }
+
+    function appendOp(op) {
+      flashJJLogo();
+      shouldReset = false;
+      const last = curVal.slice(-1);
+      if (['+', '-', '*', '/', '%'].includes(last)) {
+        curVal = curVal.slice(0, -1);
+      }
+      curVal += op;
+      updateCalc();
+    }
+
+    function clearCalc() {
+      flashJJLogo();
+      curVal = '0';
+      historyVal = '';
+      shouldReset = false;
+      updateCalc();
+    }
+
+    function backspace() {
+      flashJJLogo();
+      if (curVal.length > 1) {
+        curVal = curVal.slice(0, -1);
+      } else {
+        curVal = '0';
+      }
+      updateCalc();
+    }
+
+    function calculateResult() {
+      flashJJLogo();
+      try {
+        historyVal = curVal + ' =';
+        let evalStr = curVal.replace(/×/g, '*').replace(/÷/g, '/');
+        let res = Function('"use strict";return (' + evalStr + ')')();
+        curVal = Number.isFinite(res) ? String(parseFloat(res.toFixed(8))) : '0';
+        shouldReset = true;
+      } catch (e) {
+        curVal = 'Error';
+        shouldReset = true;
+      }
+      updateCalc();
+    }
+
+    function calcVaddi() {
+      const p = parseFloat(document.getElementById('v-amount').value);
+      const r = parseFloat(document.getElementById('v-rate').value);
+      const res = document.getElementById('v-result');
+
+      const sDay = parseInt(document.getElementById('start-day').value);
+      const sMonth = parseInt(document.getElementById('start-month').value);
+      const sYear = parseInt(document.getElementById('start-year').value);
+
+      const eDay = parseInt(document.getElementById('end-day').value);
+      const eMonth = parseInt(document.getElementById('end-month').value);
+      const eYear = parseInt(document.getElementById('end-year').value);
+
+      const startDate = new Date(sYear, sMonth, sDay);
+      const endDate = new Date(eYear, eMonth, eDay);
+
+      if (!p || !r || endDate < startDate) {
+        alert(currentLang === 'te' ? 'దయచేసి వివరాలన్నీ సరిగ్గా ఎంటర్ చేయండి.' : 'Please enter all details correctly.');
+        return;
+      }
+
+      let years = eYear - sYear;
+      let months = eMonth - sMonth;
+      let days = eDay - sDay;
+
+      if (days < 0) {
+        months -= 1;
+        const prevMonthDays = new Date(eYear, eMonth, 0).getDate();
+        days += prevMonthDays;
+      }
+
+      if (months < 0) {
+        years -= 1;
+        months += 12;
+      }
+
+      const totalMonths = (years * 12) + months;
+      const monthlyInterest = (p * r) / 100;
+      const daysInterest = (monthlyInterest / 30) * days;
+      const totalInterest = (monthlyInterest * totalMonths) + daysInterest;
+      const totalAmount = p + totalInterest;
+
+      let durationStr = "";
+      if (years > 0) {
+        durationStr += `${years} ${currentLang === 'te' ? 'సంవత్సరాల' : currentLang === 'hi' ? 'साल' : 'Years'}, `;
+      }
+      durationStr += `${months} ${currentLang === 'te' ? 'నెలల' : currentLang === 'hi' ? 'महीने' : 'Months'}, ${days} ${currentLang === 'te' ? 'రోజులు' : currentLang === 'hi' ? 'दिन' : 'Days'}`;
+
+      res.style.display = 'block';
+
+      if (currentLang === 'te') {
+        res.innerHTML = `
+          కాలం: <b>${durationStr}</b> (మొత్తం ${totalMonths} నెలల ${days} రోజులు)<br>
+          నెల వడ్డీ: <b>₹${monthlyInterest.toFixed(2)}</b><br>
+          మొత్తం వడ్డీ: <b>₹${totalInterest.toFixed(2)}</b><br>
+          చెల్లించాల్సిన మొత్తం: <b>₹${totalAmount.toFixed(2)}</b>
+        `;
+      } else if (currentLang === 'hi') {
+        res.innerHTML = `
+          अवधि: <b>${durationStr}</b> (कुल ${totalMonths} महीने ${days} दिन)<br>
+          मासिक ब्याज: <b>₹${monthlyInterest.toFixed(2)}</b><br>
+          कुल ब्याज: <b>₹${totalInterest.toFixed(2)}</b><br>
+          कुल देय राशि: <b>₹${totalAmount.toFixed(2)}</b>
+        `;
+      } else {
+        res.innerHTML = `
+          Duration: <b>${durationStr}</b> (Total ${totalMonths} Months, ${days} Days)<br>
+          Monthly Interest: <b>₹${monthlyInterest.toFixed(2)}</b><br>
+          Total Interest: <b>₹${totalInterest.toFixed(2)}</b><br>
+          Total Payable: <b>₹${totalAmount.toFixed(2)}</b>
+        `;
+      }
+    }
+
+    function calcEMI() {
+      const p = parseFloat(document.getElementById('emi-amount').value);
+      const annualR = parseFloat(document.getElementById('emi-rate').value);
+      const n = parseInt(document.getElementById('emi-months').value);
+      const res = document.getElementById('emi-result');
+
+      if (!p || !annualR || !n) {
+        alert(currentLang === 'te' ? 'దయచేసి అన్ని విలువలను ఎంటర్ చేయండి.' : 'Please enter all values.');
+        return;
+      }
+
+      const r = (annualR / 12) / 100;
+      const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      const totalPayment = emi * n;
+      const totalInterest = totalPayment - p;
+
+      res.style.display = 'block';
+      if (currentLang === 'te') {
+        res.innerHTML = `
+          నెలకు EMI: <b>₹${emi.toFixed(2)}</b><br>
+          మొత్తం వడ్డీ: <b>₹${totalInterest.toFixed(2)}</b><br>
+          మొత్తం తిరిగి చెల్లించాల్సిన సొమ్ము: <b>₹${totalPayment.toFixed(2)}</b>
+        `;
+      } else if (currentLang === 'hi') {
+        res.innerHTML = `
+          मासिक ईएमआई: <b>₹${emi.toFixed(2)}</b><br>
+          कुल ब्याज: <b>₹${totalInterest.toFixed(2)}</b><br>
+          कुल भुगतान राशि: <b>₹${totalPayment.toFixed(2)}</b>
+        `;
+      } else {
+        res.innerHTML = `
+          Monthly EMI: <b>₹${emi.toFixed(2)}</b><br>
+          Total Interest: <b>₹${totalInterest.toFixed(2)}</b><br>
+          Total Payable: <b>₹${totalPayment.toFixed(2)}</b>
+        `;
+      }
+    }
+
+    function convertLand() {
+      const val = parseFloat(document.getElementById('land-val').value);
+      const unit = document.getElementById('land-unit').value;
+      const res = document.getElementById('land-result');
+
+      if (!val) return;
+
+      let acres = 0;
+      if (unit === 'acres') acres = val;
+      else if (unit === 'guntas') acres = val / 40;
+      else if (unit === 'sqyards') acres = val / 4840;
+
+      res.style.display = 'block';
+      res.innerHTML = `
+        Acres (ఎకరాలు): <b>${acres.toFixed(4)}</b><br>
+        Guntas (గుంటలు): <b>${(acres * 40).toFixed(2)}</b><br>
+        Sq. Yards (గజాలు): <b>${(acres * 4840).toFixed(2)}</b>
+      `;
+    }
+
+    applyTheme();
+    initDateDropdowns();
+    setLang(currentLang);
+  </script>
+</body>
+</html>
