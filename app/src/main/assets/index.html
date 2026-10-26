@@ -58,8 +58,8 @@
 
   /* Header */
   .header {
-    height: 52px;
-    padding: 0 18px;
+    height: 54px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -69,7 +69,7 @@
   .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
   
   /* Original Neon JJ Logo */
@@ -84,18 +84,43 @@
     transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
   }
   .brand-name {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     color: var(--text-main);
   }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .download-badge {
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 240, 255, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.15s ease;
+  }
+  .download-badge:active {
+    transform: scale(0.95);
+  }
+
   .theme-toggle-btn {
     background: var(--nm-btn-bg);
     border: none;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 12px;
+    padding: 6px 10px;
+    border-radius: 10px;
     box-shadow: var(--nm-shadow-out);
     color: var(--text-main);
   }
@@ -182,7 +207,6 @@
     outline: none;
   }
 
-  /* Number Buttons Press: Neon Cyan Glow */
   .btn:active {
     transform: scale(0.96);
     background: var(--nm-btn-bg);
@@ -191,7 +215,6 @@
     color: var(--accent-cyan);
   }
 
-  /* AC, Delete Press: Neon Pink Glow */
   .btn-fn {
     color: var(--accent-pink);
     font-size: 20px;
@@ -202,7 +225,6 @@
     color: var(--accent-pink);
   }
 
-  /* Operators Glow */
   .btn-op {
     color: var(--accent-cyan);
     font-size: 24px;
@@ -212,7 +234,6 @@
     border: 1px solid #00f0ff;
   }
 
-  /* Equal Button */
   .btn-equal {
     grid-column: span 2;
     background: linear-gradient(135deg, var(--accent-pink), #9333ea);
@@ -373,13 +394,20 @@
 </head>
 <body>
 
-  <!-- Top Header -->
+  <!-- Top Header with Direct APK Download Button -->
   <div class="header">
     <div class="brand">
       <div class="brand-logo" id="jj-logo">JJ</div>
       <div class="brand-name">CALCULATOR</div>
     </div>
-    <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Theme">🌙</button>
+    
+    <div class="header-actions">
+      <a href="https://github.com/geeras866-lab/jj-smart-calculator/releases/download/v1.0.0/JJ-Smart-Calculator.apk" download class="download-badge">
+        <span>📲</span>
+        <span>APK</span>
+      </a>
+      <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Theme">🌙</button>
+    </div>
   </div>
 
   <div class="main-content">
@@ -488,6 +516,13 @@
     <!-- 5. Settings Screen -->
     <div id="settings-screen" class="screen">
       <div class="tool-panel">
+        <!-- Direct Download Card inside Settings -->
+        <div class="card">
+          <div class="card-title">Mobile App</div>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Download 100% offline Android App directly to your device.</p>
+          <a href="https://github.com/geeras866-lab/jj-smart-calculator/releases/download/v1.0.0/JJ-Smart-Calculator.apk" download class="submit-btn" style="text-align: center; text-decoration: none; display: block;">📥 Download APK (v1.0.0)</a>
+        </div>
+
         <div class="card">
           <div class="card-title" data-i18n="theme_title">Theme Mode</div>
           <div class="setting-row">
@@ -495,6 +530,7 @@
             <button class="lang-btn" style="padding: 8px 16px;" onclick="toggleTheme()" id="theme-toggle-label">Day Mode ☀️</button>
           </div>
         </div>
+
         <div class="card">
           <div class="card-title" data-i18n="settings_title">App Settings</div>
           <div class="field-label" data-i18n="select_lang">Choose App Language</div>
@@ -504,6 +540,7 @@
             <button class="lang-btn" id="btn-hi" onclick="setLang('hi')">हिन्दी</button>
           </div>
         </div>
+
         <div class="card">
           <div class="card-title" data-i18n="about_title">About JJ Calculator</div>
           <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;" data-i18n="about_desc">
@@ -539,13 +576,12 @@
   </div>
 
   <script>
-    // JJ Flash & Revert to Original Neon Logic
     const flashGradients = [
-      { bg: "linear-gradient(135deg, #00f0ff, #0072ff)", shadow: "0 0 20px #00f0ff, 0 0 35px #0072ff" },  // Electric Cyan
-      { bg: "linear-gradient(135deg, #00ff87, #60efff)", shadow: "0 0 20px #00ff87, 0 0 35px #60efff" },  // Neon Lime
-      { bg: "linear-gradient(135deg, #ff007f, #ffbf00)", shadow: "0 0 20px #ff007f, 0 0 35px #ffbf00" },  // Neon Sunset
-      { bg: "linear-gradient(135deg, #a855f7, #ec4899)", shadow: "0 0 20px #a855f7, 0 0 35px #ec4899" },  // Vivid Purple
-      { bg: "linear-gradient(135deg, #facc15, #f97316)", shadow: "0 0 20px #facc15, 0 0 35px #f97316" }   // Amber Glow
+      { bg: "linear-gradient(135deg, #00f0ff, #0072ff)", shadow: "0 0 20px #00f0ff, 0 0 35px #0072ff" },
+      { bg: "linear-gradient(135deg, #00ff87, #60efff)", shadow: "0 0 20px #00ff87, 0 0 35px #60efff" },
+      { bg: "linear-gradient(135deg, #ff007f, #ffbf00)", shadow: "0 0 20px #ff007f, 0 0 35px #ffbf00" },
+      { bg: "linear-gradient(135deg, #a855f7, #ec4899)", shadow: "0 0 20px #a855f7, 0 0 35px #ec4899" },
+      { bg: "linear-gradient(135deg, #facc15, #f97316)", shadow: "0 0 20px #facc15, 0 0 35px #f97316" }
     ];
 
     let flashTimer = null;
@@ -562,7 +598,6 @@
       logo.style.boxShadow = flashGradients[flashIdx].shadow;
       logo.style.transform = "scale(1.12)";
 
-      // Type cheyagane 220ms lo automatic ga original neon style loki return
       flashTimer = setTimeout(() => {
         logo.style.background = "linear-gradient(135deg, var(--accent-pink), var(--accent-cyan))";
         logo.style.boxShadow = "0 0 12px rgba(255, 42, 122, 0.5), 0 0 20px rgba(0, 240, 255, 0.3)";
@@ -570,7 +605,6 @@
       }, 220);
     }
 
-    // Theme Management
     let currentTheme = localStorage.getItem('app_theme') || 'night';
 
     function applyTheme() {
@@ -760,7 +794,6 @@
       element.classList.add('active');
     }
 
-    // Calculator Engine
     let curVal = '0';
     let historyVal = '';
     let shouldReset = false;
@@ -826,7 +859,6 @@
       updateCalc();
     }
 
-    // Exact Village Calendar Calculation Engine
     function calcVaddi() {
       const p = parseFloat(document.getElementById('v-amount').value);
       const r = parseFloat(document.getElementById('v-rate').value);
