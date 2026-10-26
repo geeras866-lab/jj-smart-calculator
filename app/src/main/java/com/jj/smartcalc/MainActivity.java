@@ -3,6 +3,7 @@ package com.jj.smartcalc;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -26,7 +27,10 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient());
 
-        // Local offline file load chesthundi (Internet lekunda 100% offline)
+        // Calendar Date Picker Dialogs సరిగ్గా ఓపెన్ అవ్వడానికి ఇది అవసరం
+        webView.setWebChromeClient(new WebChromeClient());
+
+        // Local offline file load (100% Offline)
         webView.loadUrl("file:///android_asset/index.html");
     }
 
