@@ -200,6 +200,28 @@
     margin-bottom: 12px;
     outline: none;
   }
+
+  /* Custom Inline Date Selectors */
+  .date-picker-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.3fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .date-select {
+    background: #0f1523;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 12px 8px;
+    font-size: 14px;
+    color: #fff;
+    outline: none;
+  }
+  .date-select option {
+    background: #131b2e;
+    color: #fff;
+  }
+
   .submit-btn {
     width: 100%;
     border: none;
@@ -222,7 +244,7 @@
     display: none;
   }
 
-  /* Language Selector Buttons */
+  /* Settings Grid */
   .lang-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -285,7 +307,7 @@
 
   <div class="main-content">
     
-    <!-- 1. Basic Calculator -->
+    <!-- Basic Calc -->
     <div id="basic-calc" class="screen active">
       <div class="calc-display">
         <div class="history-text" id="calc-history"></div>
@@ -318,26 +340,41 @@
       </div>
     </div>
 
-    <!-- 2. Vaddi Screen -->
+    <!-- Vaddi Screen (Custom Dropdown Date Selectors) -->
     <div id="vaddi-screen" class="screen">
       <div class="tool-panel">
         <div class="card">
           <div class="card-title" data-i18n="vaddi_title">Simple Interest (Village / Vaddi)</div>
+          
           <div class="field-label" data-i18n="vaddi_p">Principal Amount (₹)</div>
           <input type="number" id="v-amount" class="input-box" placeholder="100000">
+
           <div class="field-label" data-i18n="vaddi_r">Rate per Month (₹ per 100)</div>
           <input type="number" id="v-rate" class="input-box" placeholder="2.00">
-          <div class="field-label" data-i18n="start_date">Start Date</div>
-          <input type="date" id="v-start" class="input-box">
-          <div class="field-label" data-i18n="end_date">End Date</div>
-          <input type="date" id="v-end" class="input-box">
+
+          <!-- Start Date Custom -->
+          <div class="field-label" data-i18n="start_date">Start Date (ఇచ్చిన తేదీ)</div>
+          <div class="date-picker-row">
+            <select id="start-day" class="date-select"></select>
+            <select id="start-month" class="date-select"></select>
+            <select id="start-year" class="date-select"></select>
+          </div>
+
+          <!-- End Date Custom -->
+          <div class="field-label" data-i18n="end_date">End Date (ముగింపు తేదీ)</div>
+          <div class="date-picker-row">
+            <select id="end-day" class="date-select"></select>
+            <select id="end-month" class="date-select"></select>
+            <select id="end-year" class="date-select"></select>
+          </div>
+
           <button class="submit-btn" onclick="calcVaddi()" data-i18n="btn_calc">Calculate</button>
           <div class="result-box" id="v-result"></div>
         </div>
       </div>
     </div>
 
-    <!-- 3. EMI Screen -->
+    <!-- EMI Screen -->
     <div id="emi-screen" class="screen">
       <div class="tool-panel">
         <div class="card">
@@ -354,7 +391,7 @@
       </div>
     </div>
 
-    <!-- 4. Land Converter Screen -->
+    <!-- Land Screen -->
     <div id="land-screen" class="screen">
       <div class="tool-panel">
         <div class="card">
@@ -373,7 +410,7 @@
       </div>
     </div>
 
-    <!-- 5. Settings Screen (Languages) -->
+    <!-- Settings Screen -->
     <div id="settings-screen" class="screen">
       <div class="tool-panel">
         <div class="card">
@@ -388,7 +425,7 @@
         <div class="card">
           <div class="card-title" data-i18n="about_title">About JJ Smart Calc</div>
           <p style="font-size: 13px; color: var(--text-gray); line-height: 1.6;" data-i18n="about_desc">
-            All-in-one Smart Utility Calculator with village interest, loan EMI, unit conversion, and multi-language support. Works 100% offline.
+            All-in-one offline utility app with village interest, loan EMI, unit conversion, and multi-language support.
           </p>
         </div>
       </div>
@@ -404,7 +441,7 @@
     </div>
     <div class="nav-item" onclick="switchTab('vaddi-screen', this)">
       <span class="icon">🪙</span>
-      <span data-i18n="nav_vaddi">Vaddi</span>
+      <span data-i18n="nav_vaddi">Interest</span>
     </div>
     <div class="nav-item" onclick="switchTab('emi-screen', this)">
       <span class="icon">🏦</span>
@@ -421,15 +458,15 @@
   </div>
 
   <script>
-    // Multi-Language Dictionary
+    // Translations Data
     const i18n = {
       en: {
         offline_badge: "100% OFFLINE",
         vaddi_title: "Village Interest Calculator",
         vaddi_p: "Principal Amount (₹)",
         vaddi_r: "Monthly Interest (₹ per 100)",
-        start_date: "Start Date",
-        end_date: "End Date",
+        start_date: "Start Date (ఇచ్చిన తేదీ)",
+        end_date: "End Date (ముగింపు తేదీ)",
         btn_calc: "Calculate",
         emi_title: "Bank Loan EMI Calculator",
         emi_p: "Loan Amount (₹)",
@@ -529,6 +566,39 @@
       });
     }
 
+    // Populate Dropdown Dates (Day, Month, Year)
+    function initDateDropdowns() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+
+      const monthsNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      function fillSelects(prefix, defaultD, defaultM, defaultY) {
+        const daySel = document.getElementById(prefix + '-day');
+        const monthSel = document.getElementById(prefix + '-month');
+        const yearSel = document.getElementById(prefix + '-year');
+
+        daySel.innerHTML = '';
+        for (let i = 1; i <= 31; i++) {
+          daySel.innerHTML += `<option value="${i}" ${i === defaultD ? 'selected' : ''}>${i < 10 ? '0' + i : i}</option>`;
+        }
+
+        monthSel.innerHTML = '';
+        for (let i = 0; i < 12; i++) {
+          monthSel.innerHTML += `<option value="${i}" ${i === defaultM ? 'selected' : ''}>${monthsNames[i]}</option>`;
+        }
+
+        yearSel.innerHTML = '';
+        for (let y = currentYear - 30; y <= currentYear + 10; y++) {
+          yearSel.innerHTML += `<option value="${y}" ${y === defaultY ? 'selected' : ''}>${y}</option>`;
+        }
+      }
+
+      // Default: Start Date is 1 year ago, End Date is today
+      fillSelects('start', today.getDate(), today.getMonth(), currentYear - 1);
+      fillSelects('end', today.getDate(), today.getMonth(), currentYear);
+    }
+
     // Switch Tabs
     function switchTab(screenId, element) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -602,11 +672,19 @@
     function calcVaddi() {
       const p = parseFloat(document.getElementById('v-amount').value);
       const r = parseFloat(document.getElementById('v-rate').value);
-      const s = new Date(document.getElementById('v-start').value);
-      const e = new Date(document.getElementById('v-end').value);
       const res = document.getElementById('v-result');
 
-      if (!p || !r || isNaN(s) || isNaN(e) || e < s) {
+      const sDay = parseInt(document.getElementById('start-day').value);
+      const sMonth = parseInt(document.getElementById('start-month').value);
+      const sYear = parseInt(document.getElementById('start-year').value);
+      const s = new Date(sYear, sMonth, sDay);
+
+      const eDay = parseInt(document.getElementById('end-day').value);
+      const eMonth = parseInt(document.getElementById('end-month').value);
+      const eYear = parseInt(document.getElementById('end-year').value);
+      const e = new Date(eYear, eMonth, eDay);
+
+      if (!p || !r || e < s) {
         alert(currentLang === 'te' ? 'దయచేసి వివరాలన్నీ సరిగ్గా ఎంటర్ చేయండి.' : 'Please enter all details correctly.');
         return;
       }
@@ -704,7 +782,8 @@
       `;
     }
 
-    // Load initial language
+    // Init Page
+    initDateDropdowns();
     setLang(currentLang);
   </script>
 </body>
