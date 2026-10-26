@@ -3,16 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>JJ Smart Calc</title>
+<title>JJ Calculator</title>
 <style>
   :root {
-    --bg-dark: #0b0f19;
-    --card-bg: #131b2e;
-    --accent-pink: #ff007f;
+    --bg-main: #141a29;
+    --card-bg: #141a29;
+    --input-bg: #101522;
+    --accent-pink: #ff2a7a;
     --accent-cyan: #00f0ff;
-    --btn-num: #1e293b;
-    --text-white: #ffffff;
-    --text-gray: #94a3b8;
+    --text-main: #ffffff;
+    --text-muted: #8c9bb5;
+    --border-color: rgba(255, 255, 255, 0.05);
+    
+    --nm-shadow-out: 6px 6px 14px #0b0e17, -6px -6px 14px #1d263b;
+    --nm-shadow-in: inset 4px 4px 8px #0b0e17, inset -4px -4px 8px #1d263b;
+    --nm-btn-bg: #141a29;
+    --btn-num-text: #ffffff;
+  }
+
+  body.light-mode {
+    --bg-main: #e6ecf5;
+    --card-bg: #e6ecf5;
+    --input-bg: #dde4ef;
+    --accent-pink: #e11d48;
+    --accent-cyan: #0284c7;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: rgba(0, 0, 0, 0.05);
+    
+    --nm-shadow-out: 6px 6px 12px #c5cbd4, -6px -6px 12px #ffffff;
+    --nm-shadow-in: inset 4px 4px 8px #c5cbd4, inset -4px -4px 8px #ffffff;
+    --nm-btn-bg: #e6ecf5;
+    --btn-num-text: #1e293b;
   }
 
   * {
@@ -22,51 +44,60 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   body {
-    background-color: var(--bg-dark);
-    color: var(--text-white);
+    background-color: var(--bg-main);
+    color: var(--text-main);
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
   }
 
+  /* Header */
   .header {
     height: 52px;
-    padding: 0 16px;
+    padding: 0 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(19, 27, 46, 0.8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border-color);
   }
   .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
+  
+  /* Original Neon JJ Logo */
   .brand-logo {
     background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
     color: #fff;
     font-weight: 900;
     font-size: 14px;
-    padding: 3px 8px;
-    border-radius: 6px;
+    padding: 4px 9px;
+    border-radius: 8px;
+    box-shadow: 0 0 12px rgba(255, 42, 122, 0.5), 0 0 20px rgba(0, 240, 255, 0.3);
+    transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
   }
   .brand-name {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--text-main);
   }
-  .badge {
-    background: rgba(0, 240, 255, 0.1);
-    color: var(--accent-cyan);
-    font-size: 11px;
-    padding: 3px 8px;
+  .theme-toggle-btn {
+    background: var(--nm-btn-bg);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px 12px;
     border-radius: 12px;
-    border: 1px solid rgba(0, 240, 255, 0.3);
+    box-shadow: var(--nm-shadow-out);
+    color: var(--text-main);
   }
 
   .main-content {
@@ -87,9 +118,9 @@
     display: flex;
   }
 
-  /* Full Screen Calculator */
+  /* 3D Neumorphic Keypad */
   #basic-calc {
-    padding: 12px;
+    padding: 16px 18px;
     display: none;
     flex-direction: column;
     justify-content: space-between;
@@ -100,27 +131,26 @@
   }
 
   .calc-display {
-    background: var(--card-bg);
-    border-radius: 18px;
-    padding: 16px 20px;
+    background: var(--nm-btn-bg);
+    border-radius: 22px;
+    padding: 18px 22px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-end;
-    min-height: 120px;
-    max-height: 140px;
-    margin-bottom: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    min-height: 130px;
+    margin-bottom: 18px;
+    box-shadow: var(--nm-shadow-in);
   }
   .history-text {
     font-size: 16px;
-    color: var(--text-gray);
-    min-height: 20px;
+    color: var(--text-muted);
+    min-height: 22px;
   }
   .current-text {
     font-size: 42px;
     font-weight: 600;
-    color: var(--text-white);
+    color: var(--text-main);
     overflow-x: auto;
     max-width: 100%;
     white-space: nowrap;
@@ -129,54 +159,85 @@
   .keypad-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-gap: 10px;
-    flex: 1;
+    grid-gap: 14px;
+    margin-top: auto;
+    padding-bottom: 8px;
   }
 
+  /* 3D Button + Neon Press Effects */
   .btn {
-    border: none;
-    border-radius: 16px;
-    font-size: 26px;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    height: 62px;
+    font-size: 22px;
     font-weight: 600;
-    color: var(--text-white);
+    color: var(--btn-num-text);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--btn-num);
+    background: var(--nm-btn-bg);
+    box-shadow: var(--nm-shadow-out);
     cursor: pointer;
-  }
-  .btn:active {
-    transform: scale(0.96);
-    filter: brightness(1.2);
-  }
-  .btn-fn {
-    color: var(--accent-pink);
-    font-size: 22px;
-  }
-  .btn-op {
-    background: rgba(0, 240, 255, 0.12);
-    color: var(--accent-cyan);
-    font-size: 26px;
-    border: 1px solid rgba(0, 240, 255, 0.2);
-  }
-  .btn-equal {
-    grid-column: span 2;
-    background: linear-gradient(135deg, var(--accent-pink), #a855f7);
-    font-size: 32px;
+    transition: all 0.12s ease-in-out;
+    outline: none;
   }
 
-  /* Form Panels */
+  /* Number Buttons Press: Neon Cyan Glow */
+  .btn:active {
+    transform: scale(0.96);
+    background: var(--nm-btn-bg);
+    box-shadow: var(--nm-shadow-in), 0 0 16px rgba(0, 240, 255, 0.75), 0 0 32px rgba(0, 240, 255, 0.35);
+    border: 1px solid rgba(0, 240, 255, 0.85);
+    color: var(--accent-cyan);
+  }
+
+  /* AC, Delete Press: Neon Pink Glow */
+  .btn-fn {
+    color: var(--accent-pink);
+    font-size: 20px;
+  }
+  .btn-fn:active {
+    box-shadow: var(--nm-shadow-in), 0 0 16px rgba(255, 42, 122, 0.8), 0 0 32px rgba(255, 42, 122, 0.4);
+    border: 1px solid rgba(255, 42, 122, 0.9);
+    color: var(--accent-pink);
+  }
+
+  /* Operators Glow */
+  .btn-op {
+    color: var(--accent-cyan);
+    font-size: 24px;
+  }
+  .btn-op:active {
+    box-shadow: var(--nm-shadow-in), 0 0 20px rgba(0, 240, 255, 0.85), 0 0 40px rgba(0, 240, 255, 0.45);
+    border: 1px solid #00f0ff;
+  }
+
+  /* Equal Button */
+  .btn-equal {
+    grid-column: span 2;
+    background: linear-gradient(135deg, var(--accent-pink), #9333ea);
+    color: #ffffff;
+    font-size: 28px;
+    box-shadow: 0 4px 15px rgba(255, 42, 122, 0.4);
+  }
+  .btn-equal:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 25px rgba(255, 42, 122, 0.9), 0 0 45px rgba(147, 51, 234, 0.7);
+    border: 1px solid #ff2a7a;
+  }
+
+  /* Tool Panels */
   .tool-panel {
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
   }
   .card {
-    background: var(--card-bg);
-    border-radius: 16px;
+    background: var(--nm-btn-bg);
+    border-radius: 20px;
     padding: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: var(--nm-shadow-out);
   }
   .card-title {
     font-size: 16px;
@@ -186,65 +247,76 @@
   }
   .field-label {
     font-size: 13px;
-    color: var(--text-gray);
+    color: var(--text-muted);
     margin-bottom: 6px;
   }
   .input-box {
     width: 100%;
-    background: #0f1523;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
+    background: var(--input-bg);
+    border: none;
+    border-radius: 12px;
     padding: 12px 14px;
     font-size: 16px;
-    color: #fff;
+    color: var(--text-main);
     margin-bottom: 12px;
     outline: none;
+    box-shadow: var(--nm-shadow-in);
   }
 
-  /* Custom Inline Date Selectors */
   .date-picker-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.3fr;
+    grid-template-columns: 1fr 1.2fr 1.3fr;
     gap: 8px;
     margin-bottom: 12px;
   }
   .date-select {
-    background: #0f1523;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
+    background: var(--input-bg);
+    border: none;
+    border-radius: 12px;
     padding: 12px 8px;
     font-size: 14px;
-    color: #fff;
+    color: var(--text-main);
     outline: none;
+    box-shadow: var(--nm-shadow-in);
   }
   .date-select option {
-    background: #131b2e;
-    color: #fff;
+    background: var(--bg-main);
+    color: var(--text-main);
   }
 
   .submit-btn {
     width: 100%;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 14px;
     font-size: 16px;
     font-weight: 700;
     background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
     color: #fff;
     cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 42, 122, 0.3);
+  }
+  .submit-btn:active {
+    box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.4);
   }
   .result-box {
     margin-top: 14px;
-    padding: 12px;
-    background: rgba(0, 240, 255, 0.08);
-    border-radius: 10px;
-    border-left: 4px solid var(--accent-cyan);
+    padding: 14px;
+    background: var(--input-bg);
+    border-radius: 14px;
+    box-shadow: var(--nm-shadow-in);
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.7;
     display: none;
+    border-left: 4px solid var(--accent-cyan);
   }
 
-  /* Settings Grid */
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+  }
   .lang-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -253,24 +325,28 @@
   }
   .lang-btn {
     padding: 12px 8px;
-    background: var(--btn-num);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    color: #fff;
+    background: var(--nm-btn-bg);
+    border: none;
+    border-radius: 12px;
+    color: var(--btn-num-text);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    box-shadow: var(--nm-shadow-out);
+  }
+  .lang-btn:active {
+    box-shadow: var(--nm-shadow-in);
   }
   .lang-btn.active {
     background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
-    border: none;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255, 42, 122, 0.35);
   }
 
-  /* Bottom Navigation */
   .bottom-nav {
     height: 60px;
-    background: #0d121f;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--bg-main);
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -280,7 +356,7 @@
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    color: var(--text-gray);
+    color: var(--text-muted);
     font-size: 11px;
     cursor: pointer;
     flex: 1;
@@ -297,17 +373,18 @@
 </head>
 <body>
 
+  <!-- Top Header -->
   <div class="header">
     <div class="brand">
-      <div class="brand-logo">JJ</div>
-      <div class="brand-name">SMART CALC</div>
+      <div class="brand-logo" id="jj-logo">JJ</div>
+      <div class="brand-name">CALCULATOR</div>
     </div>
-    <div class="badge" data-i18n="offline_badge">100% OFFLINE</div>
+    <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Theme">🌙</button>
   </div>
 
   <div class="main-content">
     
-    <!-- Basic Calc -->
+    <!-- 1. Basic Calc -->
     <div id="basic-calc" class="screen active">
       <div class="calc-display">
         <div class="history-text" id="calc-history"></div>
@@ -340,7 +417,7 @@
       </div>
     </div>
 
-    <!-- Vaddi Screen (Custom Dropdown Date Selectors) -->
+    <!-- 2. Vaddi Screen -->
     <div id="vaddi-screen" class="screen">
       <div class="tool-panel">
         <div class="card">
@@ -352,20 +429,18 @@
           <div class="field-label" data-i18n="vaddi_r">Rate per Month (₹ per 100)</div>
           <input type="number" id="v-rate" class="input-box" placeholder="2.00">
 
-          <!-- Start Date Custom -->
           <div class="field-label" data-i18n="start_date">Start Date (ఇచ్చిన తేదీ)</div>
           <div class="date-picker-row">
             <select id="start-day" class="date-select"></select>
-            <select id="start-month" class="date-select"></select>
-            <select id="start-year" class="date-select"></select>
+            <select id="start-month" class="date-select" onchange="updateDays('start')"></select>
+            <select id="start-year" class="date-select" onchange="updateDays('start')"></select>
           </div>
 
-          <!-- End Date Custom -->
           <div class="field-label" data-i18n="end_date">End Date (ముగింపు తేదీ)</div>
           <div class="date-picker-row">
             <select id="end-day" class="date-select"></select>
-            <select id="end-month" class="date-select"></select>
-            <select id="end-year" class="date-select"></select>
+            <select id="end-month" class="date-select" onchange="updateDays('end')"></select>
+            <select id="end-year" class="date-select" onchange="updateDays('end')"></select>
           </div>
 
           <button class="submit-btn" onclick="calcVaddi()" data-i18n="btn_calc">Calculate</button>
@@ -374,7 +449,7 @@
       </div>
     </div>
 
-    <!-- EMI Screen -->
+    <!-- 3. EMI Screen -->
     <div id="emi-screen" class="screen">
       <div class="tool-panel">
         <div class="card">
@@ -391,7 +466,7 @@
       </div>
     </div>
 
-    <!-- Land Screen -->
+    <!-- 4. Land Screen -->
     <div id="land-screen" class="screen">
       <div class="tool-panel">
         <div class="card">
@@ -410,9 +485,16 @@
       </div>
     </div>
 
-    <!-- Settings Screen -->
+    <!-- 5. Settings Screen -->
     <div id="settings-screen" class="screen">
       <div class="tool-panel">
+        <div class="card">
+          <div class="card-title" data-i18n="theme_title">Theme Mode</div>
+          <div class="setting-row">
+            <span style="font-size: 14px;" data-i18n="theme_label">Switch Day / Night</span>
+            <button class="lang-btn" style="padding: 8px 16px;" onclick="toggleTheme()" id="theme-toggle-label">Day Mode ☀️</button>
+          </div>
+        </div>
         <div class="card">
           <div class="card-title" data-i18n="settings_title">App Settings</div>
           <div class="field-label" data-i18n="select_lang">Choose App Language</div>
@@ -423,9 +505,9 @@
           </div>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="about_title">About JJ Smart Calc</div>
-          <p style="font-size: 13px; color: var(--text-gray); line-height: 1.6;" data-i18n="about_desc">
-            All-in-one offline utility app with village interest, loan EMI, unit conversion, and multi-language support.
+          <div class="card-title" data-i18n="about_title">About JJ Calculator</div>
+          <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;" data-i18n="about_desc">
+            All-in-one smart calculator with accurate village interest, loan EMI, unit conversion, and multi-language support.
           </p>
         </div>
       </div>
@@ -433,7 +515,6 @@
 
   </div>
 
-  <!-- Bottom Navigation -->
   <div class="bottom-nav">
     <div class="nav-item active" onclick="switchTab('basic-calc', this)">
       <span class="icon">🔢</span>
@@ -458,10 +539,66 @@
   </div>
 
   <script>
-    // Translations Data
+    // JJ Flash & Revert to Original Neon Logic
+    const flashGradients = [
+      { bg: "linear-gradient(135deg, #00f0ff, #0072ff)", shadow: "0 0 20px #00f0ff, 0 0 35px #0072ff" },  // Electric Cyan
+      { bg: "linear-gradient(135deg, #00ff87, #60efff)", shadow: "0 0 20px #00ff87, 0 0 35px #60efff" },  // Neon Lime
+      { bg: "linear-gradient(135deg, #ff007f, #ffbf00)", shadow: "0 0 20px #ff007f, 0 0 35px #ffbf00" },  // Neon Sunset
+      { bg: "linear-gradient(135deg, #a855f7, #ec4899)", shadow: "0 0 20px #a855f7, 0 0 35px #ec4899" },  // Vivid Purple
+      { bg: "linear-gradient(135deg, #facc15, #f97316)", shadow: "0 0 20px #facc15, 0 0 35px #f97316" }   // Amber Glow
+    ];
+
+    let flashTimer = null;
+    let flashIdx = 0;
+
+    function flashJJLogo() {
+      const logo = document.getElementById('jj-logo');
+      if (!logo) return;
+
+      if (flashTimer) clearTimeout(flashTimer);
+
+      flashIdx = (flashIdx + 1) % flashGradients.length;
+      logo.style.background = flashGradients[flashIdx].bg;
+      logo.style.boxShadow = flashGradients[flashIdx].shadow;
+      logo.style.transform = "scale(1.12)";
+
+      // Type cheyagane 220ms lo automatic ga original neon style loki return
+      flashTimer = setTimeout(() => {
+        logo.style.background = "linear-gradient(135deg, var(--accent-pink), var(--accent-cyan))";
+        logo.style.boxShadow = "0 0 12px rgba(255, 42, 122, 0.5), 0 0 20px rgba(0, 240, 255, 0.3)";
+        logo.style.transform = "scale(1)";
+      }, 220);
+    }
+
+    // Theme Management
+    let currentTheme = localStorage.getItem('app_theme') || 'night';
+
+    function applyTheme() {
+      const body = document.body;
+      const themeBtn = document.getElementById('theme-btn');
+      const themeToggleLabel = document.getElementById('theme-toggle-label');
+
+      if (currentTheme === 'day') {
+        body.classList.add('light-mode');
+        if (themeBtn) themeBtn.innerText = '☀️';
+        if (themeToggleLabel) themeToggleLabel.innerText = 'Night Mode 🌙';
+      } else {
+        body.classList.remove('light-mode');
+        if (themeBtn) themeBtn.innerText = '🌙';
+        if (themeToggleLabel) themeToggleLabel.innerText = 'Day Mode ☀️';
+      }
+      localStorage.setItem('app_theme', currentTheme);
+    }
+
+    function toggleTheme() {
+      currentTheme = currentTheme === 'night' ? 'day' : 'night';
+      applyTheme();
+    }
+
     const i18n = {
       en: {
-        offline_badge: "100% OFFLINE",
+        theme_title: "Appearance",
+        theme_label: "Display Theme",
         vaddi_title: "Village Interest Calculator",
         vaddi_p: "Principal Amount (₹)",
         vaddi_r: "Monthly Interest (₹ per 100)",
@@ -481,8 +618,8 @@
         opt_sqyards: "Sq. Yards",
         settings_title: "App Settings",
         select_lang: "Choose App Language",
-        about_title: "About JJ Smart Calc",
-        about_desc: "All-in-one offline utility app with village interest, loan EMI, unit conversion, and multi-language support.",
+        about_title: "About JJ Calculator",
+        about_desc: "All-in-one smart calculator with accurate village interest, loan EMI, unit conversion, and multi-language support.",
         nav_basic: "Basic",
         nav_vaddi: "Interest",
         nav_emi: "EMI",
@@ -490,7 +627,8 @@
         nav_settings: "Settings"
       },
       te: {
-        offline_badge: "100% ఆఫ్‌లైన్",
+        theme_title: "రూపురేఖలు (Theme)",
+        theme_label: "స్క్రీన్ థీమ్",
         vaddi_title: "తెలుగు గ్రామీణ వడ్డీ లెక్క",
         vaddi_p: "అసలు మొత్తం (₹)",
         vaddi_r: "నూరు రూపాయలకు నెలకు వడ్డీ (₹)",
@@ -510,7 +648,7 @@
         opt_sqyards: "గజాలు (Sq. Yards)",
         settings_title: "యాప్ సెట్టింగ్స్",
         select_lang: "భాషను ఎంచుకోండి",
-        about_title: "JJ Smart Calc గురించి",
+        about_title: "JJ Calculator గురించి",
         about_desc: "గ్రామీణ వడ్డీ లెక్కలు, బ్యాంక్ EMI, భూమి కొలతలు మరియు మల్టీ-లాంగ్వేజ్ సపోర్ట్ ఉన్న ఆఫ్‌లైన్ యాప్.",
         nav_basic: "బేసిక్",
         nav_vaddi: "వడ్డీ",
@@ -519,7 +657,8 @@
         nav_settings: "సెట్టింగ్స్"
       },
       hi: {
-        offline_badge: "100% ऑफलाइन",
+        theme_title: "थीम मोड",
+        theme_label: "डिस्प्ले थीम",
         vaddi_title: "देसी ब्याज कैलकुलेटर",
         vaddi_p: "मूलधन (₹)",
         vaddi_r: "मासिक ब्याज दर (₹ प्रति ₹100)",
@@ -539,7 +678,7 @@
         opt_sqyards: "गज (Sq. Yards)",
         settings_title: "ऐप सेटिंग्स",
         select_lang: "भाषा चुनें",
-        about_title: "JJ Smart Calc के बारे में",
+        about_title: "JJ Calculator के बारे में",
         about_desc: "देसी ब्याज, बैंक ईएमआई और भूमि मापन वाला ऑल-इन-वन ऑफलाइन कैलकुलेटर।",
         nav_basic: "कैलकुलेटर",
         nav_vaddi: "ब्याज",
@@ -566,22 +705,35 @@
       });
     }
 
-    // Populate Dropdown Dates (Day, Month, Year)
+    const monthsNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    function getDaysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
+
+    function updateDays(prefix) {
+      const daySel = document.getElementById(prefix + '-day');
+      const monthSel = document.getElementById(prefix + '-month');
+      const yearSel = document.getElementById(prefix + '-year');
+
+      const y = parseInt(yearSel.value);
+      const m = parseInt(monthSel.value);
+      const prevSelectedDay = parseInt(daySel.value) || 1;
+
+      const totalDays = getDaysInMonth(y, m);
+      daySel.innerHTML = '';
+      for (let i = 1; i <= totalDays; i++) {
+        daySel.innerHTML += `<option value="${i}" ${i === Math.min(prevSelectedDay, totalDays) ? 'selected' : ''}>${i < 10 ? '0' + i : i}</option>`;
+      }
+    }
+
     function initDateDropdowns() {
       const today = new Date();
       const currentYear = today.getFullYear();
 
-      const monthsNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-      function fillSelects(prefix, defaultD, defaultM, defaultY) {
-        const daySel = document.getElementById(prefix + '-day');
+      function setupDropdown(prefix, defaultD, defaultM, defaultY) {
         const monthSel = document.getElementById(prefix + '-month');
         const yearSel = document.getElementById(prefix + '-year');
-
-        daySel.innerHTML = '';
-        for (let i = 1; i <= 31; i++) {
-          daySel.innerHTML += `<option value="${i}" ${i === defaultD ? 'selected' : ''}>${i < 10 ? '0' + i : i}</option>`;
-        }
 
         monthSel.innerHTML = '';
         for (let i = 0; i < 12; i++) {
@@ -592,14 +744,15 @@
         for (let y = currentYear - 30; y <= currentYear + 10; y++) {
           yearSel.innerHTML += `<option value="${y}" ${y === defaultY ? 'selected' : ''}>${y}</option>`;
         }
+
+        updateDays(prefix);
+        document.getElementById(prefix + '-day').value = defaultD;
       }
 
-      // Default: Start Date is 1 year ago, End Date is today
-      fillSelects('start', today.getDate(), today.getMonth(), currentYear - 1);
-      fillSelects('end', today.getDate(), today.getMonth(), currentYear);
+      setupDropdown('start', today.getDate(), today.getMonth(), currentYear - 1);
+      setupDropdown('end', today.getDate(), today.getMonth(), currentYear);
     }
 
-    // Switch Tabs
     function switchTab(screenId, element) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -607,7 +760,7 @@
       element.classList.add('active');
     }
 
-    // Calculator Logic
+    // Calculator Engine
     let curVal = '0';
     let historyVal = '';
     let shouldReset = false;
@@ -618,6 +771,7 @@
     }
 
     function appendNum(n) {
+      flashJJLogo();
       if (shouldReset) {
         curVal = '';
         shouldReset = false;
@@ -629,6 +783,7 @@
     }
 
     function appendOp(op) {
+      flashJJLogo();
       shouldReset = false;
       const last = curVal.slice(-1);
       if (['+', '-', '*', '/', '%'].includes(last)) {
@@ -639,6 +794,7 @@
     }
 
     function clearCalc() {
+      flashJJLogo();
       curVal = '0';
       historyVal = '';
       shouldReset = false;
@@ -646,6 +802,7 @@
     }
 
     function backspace() {
+      flashJJLogo();
       if (curVal.length > 1) {
         curVal = curVal.slice(0, -1);
       } else {
@@ -655,6 +812,7 @@
     }
 
     function calculateResult() {
+      flashJJLogo();
       try {
         historyVal = curVal + ' =';
         let evalStr = curVal.replace(/×/g, '*').replace(/÷/g, '/');
@@ -668,7 +826,7 @@
       updateCalc();
     }
 
-    // Vaddi Calculator Logic
+    // Exact Village Calendar Calculation Engine
     function calcVaddi() {
       const p = parseFloat(document.getElementById('v-amount').value);
       const r = parseFloat(document.getElementById('v-rate').value);
@@ -677,44 +835,65 @@
       const sDay = parseInt(document.getElementById('start-day').value);
       const sMonth = parseInt(document.getElementById('start-month').value);
       const sYear = parseInt(document.getElementById('start-year').value);
-      const s = new Date(sYear, sMonth, sDay);
 
       const eDay = parseInt(document.getElementById('end-day').value);
       const eMonth = parseInt(document.getElementById('end-month').value);
       const eYear = parseInt(document.getElementById('end-year').value);
-      const e = new Date(eYear, eMonth, eDay);
 
-      if (!p || !r || e < s) {
+      const startDate = new Date(sYear, sMonth, sDay);
+      const endDate = new Date(eYear, eMonth, eDay);
+
+      if (!p || !r || endDate < startDate) {
         alert(currentLang === 'te' ? 'దయచేసి వివరాలన్నీ సరిగ్గా ఎంటర్ చేయండి.' : 'Please enter all details correctly.');
         return;
       }
 
-      let diffDays = Math.floor((e - s) / (1000 * 60 * 60 * 24));
-      let months = Math.floor(diffDays / 30);
-      let days = diffDays % 30;
+      let years = eYear - sYear;
+      let months = eMonth - sMonth;
+      let days = eDay - sDay;
 
-      let monthlyInterest = (p * r) / 100;
-      let totalInterest = (monthlyInterest * months) + ((monthlyInterest / 30) * days);
-      let totalAmount = p + totalInterest;
+      if (days < 0) {
+        months -= 1;
+        const prevMonthDays = new Date(eYear, eMonth, 0).getDate();
+        days += prevMonthDays;
+      }
+
+      if (months < 0) {
+        years -= 1;
+        months += 12;
+      }
+
+      const totalMonths = (years * 12) + months;
+      const monthlyInterest = (p * r) / 100;
+      const daysInterest = (monthlyInterest / 30) * days;
+      const totalInterest = (monthlyInterest * totalMonths) + daysInterest;
+      const totalAmount = p + totalInterest;
+
+      let durationStr = "";
+      if (years > 0) {
+        durationStr += `${years} ${currentLang === 'te' ? 'సంవత్సరాల' : currentLang === 'hi' ? 'साल' : 'Years'}, `;
+      }
+      durationStr += `${months} ${currentLang === 'te' ? 'నెలల' : currentLang === 'hi' ? 'महीने' : 'Months'}, ${days} ${currentLang === 'te' ? 'రోజులు' : currentLang === 'hi' ? 'दिन' : 'Days'}`;
 
       res.style.display = 'block';
+
       if (currentLang === 'te') {
         res.innerHTML = `
-          కాలం: <b>${months} నెలలు, ${days} రోజులు</b> (${diffDays} రోజులు)<br>
+          కాలం: <b>${durationStr}</b> (మొత్తం ${totalMonths} నెలల ${days} రోజులు)<br>
           నెల వడ్డీ: <b>₹${monthlyInterest.toFixed(2)}</b><br>
           మొత్తం వడ్డీ: <b>₹${totalInterest.toFixed(2)}</b><br>
           చెల్లించాల్సిన మొత్తం: <b>₹${totalAmount.toFixed(2)}</b>
         `;
       } else if (currentLang === 'hi') {
         res.innerHTML = `
-          अवधि: <b>${months} महीने, ${days} दिन</b> (${diffDays} दिन)<br>
+          अवधि: <b>${durationStr}</b> (कुल ${totalMonths} महीने ${days} दिन)<br>
           मासिक ब्याज: <b>₹${monthlyInterest.toFixed(2)}</b><br>
           कुल ब्याज: <b>₹${totalInterest.toFixed(2)}</b><br>
           कुल देय राशि: <b>₹${totalAmount.toFixed(2)}</b>
         `;
       } else {
         res.innerHTML = `
-          Duration: <b>${months} Months, ${days} Days</b> (${diffDays} Days)<br>
+          Duration: <b>${durationStr}</b> (Total ${totalMonths} Months, ${days} Days)<br>
           Monthly Interest: <b>₹${monthlyInterest.toFixed(2)}</b><br>
           Total Interest: <b>₹${totalInterest.toFixed(2)}</b><br>
           Total Payable: <b>₹${totalAmount.toFixed(2)}</b>
@@ -722,7 +901,6 @@
       }
     }
 
-    // EMI Logic
     function calcEMI() {
       const p = parseFloat(document.getElementById('emi-amount').value);
       const annualR = parseFloat(document.getElementById('emi-rate').value);
@@ -761,7 +939,6 @@
       }
     }
 
-    // Land Converter Logic
     function convertLand() {
       const val = parseFloat(document.getElementById('land-val').value);
       const unit = document.getElementById('land-unit').value;
@@ -782,7 +959,7 @@
       `;
     }
 
-    // Init Page
+    applyTheme();
     initDateDropdowns();
     setLang(currentLang);
   </script>
