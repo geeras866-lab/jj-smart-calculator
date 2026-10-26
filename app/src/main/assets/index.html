@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JJ Smart Calculator</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131c2e;
+      --card-border: #1f2d47;
+      --primary: #ff007f;
+      --cyan: #00f0ff;
+      --amber: #f59e0b;
+      --text: #ffffff;
+      --text-muted: #8b9bb4;
+      --btn-bg: #1c2638;
+      --btn-active: #2a3b57;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 70px; min-height: 100vh; }
+    
+    /* Header */
+    header { background: #080c14; padding: 14px 16px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .logo-wrap { display: flex; align-items: center; gap: 10px; }
+    .jj-badge { background: linear-gradient(135deg, var(--primary), #a855f7); color: #fff; font-weight: 900; font-size: 14px; padding: 4px 8px; border-radius: 6px; letter-spacing: 1px; }
+    .logo-text h1 { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; }
+    .logo-text p { font-size: 10px; color: var(--cyan); }
+    .status-badge { font-size: 10px; background: rgba(0,240,255,0.1); color: var(--cyan); border: 1px solid rgba(0,240,255,0.3); padding: 3px 8px; border-radius: 12px; }
+
+    /* Module Views */
+    .module-view { display: none; padding: 16px; max-width: 500px; margin: 0 auto; }
+    .module-view.active { display: block; }
+    
+    .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+    .card-title { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Basic Calc Display */
+    .calc-screen { background: #070a12; border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; text-align: right; margin-bottom: 14px; }
+    .calc-history { font-size: 14px; color: var(--text-muted); min-height: 20px; overflow-x: auto; white-space: nowrap; }
+    .calc-main { font-size: 36px; font-weight: 700; color: #fff; overflow-x: auto; white-space: nowrap; }
+    
+    /* Calc Grid */
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .btn { background: var(--btn-bg); border: 1px solid var(--card-border); color: #fff; font-size: 20px; font-weight: 600; padding: 16px 0; border-radius: 12px; cursor: pointer; text-align: center; }
+    .btn:active { background: var(--btn-active); transform: scale(0.98); }
+    .btn.op { color: var(--cyan); background: rgba(0,240,255,0.08); border-color: rgba(0,240,255,0.2); }
+    .btn.action { color: #f43f5e; background: rgba(244,63,94,0.1); border-color: rgba(244,63,94,0.3); }
+    .btn.backspace { color: var(--amber); background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); }
+    .btn.equals { background: linear-gradient(135deg, var(--primary), #a855f7); color: #fff; grid-column: span 2; border: none; }
+
+    /* Forms & Inputs */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+    .input-field { width: 100%; background: #070a12; border: 1px solid var(--card-border); color: #fff; font-size: 16px; padding: 12px; border-radius: 10px; outline: none; }
+    .input-field:focus { border-color: var(--cyan); }
+    .calc-action-btn { width: 100%; background: linear-gradient(135deg, var(--primary), #a855f7); color: #fff; border: none; font-size: 16px; font-weight: 700; padding: 14px; border-radius: 10px; cursor: pointer; margin-top: 8px; }
+    
+    /* Result Box */
+    .result-box { background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.2); border-radius: 12px; padding: 14px; margin-top: 16px; }
+    .res-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+    .res-label { color: var(--text-muted); }
+    .res-val { font-weight: 700; color: #fff; }
+    .res-val.highlight { color: var(--cyan); font-size: 16px; }
+
+    /* Bottom Navigation */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #080c14; border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; cursor: pointer; border: none; background: none; }
+    .nav-item.active { color: var(--primary); font-weight: 700; }
+    .nav-icon { font-size: 18px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-wrap">
+      <div class="jj-badge">JJ</div>
+      <div class="logo-text">
+        <h1>SMART CALC</h1>
+        <p>Offline Telugu & Daily Utilities</p>
+      </div>
+    </div>
+    <div class="status-badge">100% OFFLINE</div>
+  </header>
+
+  <!-- MODULE 1: BASIC CALC -->
+  <div id="view-basic" class="module-view active">
+    <div class="calc-screen">
+      <div id="calc-history" class="calc-history"></div>
+      <div id="calc-main" class="calc-main">0</div>
+    </div>
+    <div class="calc-grid">
+      <button class="btn action" onclick="clearCalc()">AC</button>
+      <button class="btn backspace" onclick="backspaceCalc()">⌫</button>
+      <button class="btn op" onclick="pressOp('%')">%</button>
+      <button class="btn op" onclick="pressOp('/')">÷</button>
+
+      <button class="btn" onclick="pressNum('7')">7</button>
+      <button class="btn" onclick="pressNum('8')">8</button>
+      <button class="btn" onclick="pressNum('9')">9</button>
+      <button class="btn op" onclick="pressOp('*')">×</button>
+
+      <button class="btn" onclick="pressNum('4')">4</button>
+      <button class="btn" onclick="pressNum('5')">5</button>
+      <button class="btn" onclick="pressNum('6')">6</button>
+      <button class="btn op" onclick="pressOp('-')">−</button>
+
+      <button class="btn" onclick="pressNum('1')">1</button>
+      <button class="btn" onclick="pressNum('2')">2</button>
+      <button class="btn" onclick="pressNum('3')">3</button>
+      <button class="btn op" onclick="pressOp('+')">+</button>
+
+      <button class="btn" onclick="pressNum('0')">0</button>
+      <button class="btn" onclick="pressNum('.')">.</button>
+      <button class="btn equals" onclick="calcEquals()">=</button>
+    </div>
+  </div>
+
+  <!-- MODULE 2: TELUGU VADDI -->
+  <div id="view-vaddi" class="module-view">
+    <div class="card">
+      <div class="card-title">
+        <span>తెలుగు వడ్డీ లెక్క (Village Interest)</span>
+        <span class="jj-badge" style="font-size:10px;">JJ</span>
+      </div>
+      <div class="form-group">
+        <label>అసలు (Principal Amount in ₹)</label>
+        <input type="number" id="vaddi-asalu" class="input-field" placeholder="ఉదా: 50000">
+      </div>
+      <div class="form-group">
+        <label>నూరు రూపాయలకు వడ్డీ (₹ Rate per Month)</label>
+        <input type="number" step="0.25" id="vaddi-rate" class="input-field" placeholder="ఉదా: 2 (రూపాయిన్నర, రెండు రూపాయలు)">
+      </div>
+      <div class="form-group">
+        <label>ఇచ్చిన తేదీ (Start Date)</label>
+        <input type="date" id="vaddi-start" class="input-field">
+      </div>
+      <div class="form-group">
+        <label>ముగింపు తేదీ (End Date)</label>
+        <input type="date" id="vaddi-end" class="input-field">
+      </div>
+      <button class="calc-action-btn" onclick="calculateVaddi()">వడ్డీ లెక్కించు (Calculate)</button>
+
+      <div id="vaddi-result" class="result-box" style="display:none;">
+        <div class="res-row"><span class="res-label">కాలం (Time):</span><span id="res-vaddi-time" class="res-val">-</span></div>
+        <div class="res-row"><span class="res-label">వడ్డీ (Interest Amount):</span><span id="res-vaddi-interest" class="res-val highlight">₹0</span></div>
+        <div class="res-row"><span class="res-label">మొత్తం (Total Payable):</span><span id="res-vaddi-total" class="res-val highlight">₹0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 3: LOAN EMI -->
+  <div id="view-emi" class="module-view">
+    <div class="card">
+      <div class="card-title">
+        <span>Bank Loan & EMI Calculator</span>
+        <span class="jj-badge" style="font-size:10px;">JJ</span>
+      </div>
+      <div class="form-group">
+        <label>Loan Amount (₹)</label>
+        <input type="number" id="emi-amount" class="input-field" placeholder="e.g. 500000">
+      </div>
+      <div class="form-group">
+        <label>Annual Interest Rate (% p.a.)</label>
+        <input type="number" step="0.1" id="emi-rate" class="input-field" placeholder="e.g. 10.5">
+      </div>
+      <div class="form-group">
+        <label>Tenure (Years)</label>
+        <input type="number" id="emi-years" class="input-field" placeholder="e.g. 3">
+      </div>
+      <button class="calc-action-btn" onclick="calculateEMI()">Calculate Monthly EMI</button>
+
+      <div id="emi-result" class="result-box" style="display:none;">
+        <div class="res-row"><span class="res-label">Monthly EMI:</span><span id="res-emi-monthly" class="res-val highlight">₹0</span></div>
+        <div class="res-row"><span class="res-label">Total Interest:</span><span id="res-emi-interest" class="res-val">₹0</span></div>
+        <div class="res-row"><span class="res-label">Total Payment:</span><span id="res-emi-total" class="res-val highlight">₹0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 4: LAND CONVERTER -->
+  <div id="view-land" class="module-view">
+    <div class="card">
+      <div class="card-title">
+        <span>AP & Telangana Land Converter</span>
+        <span class="jj-badge" style="font-size:10px;">JJ</span>
+      </div>
+      <div class="form-group">
+        <label>Enter Value</label>
+        <input type="number" id="land-val" class="input-field" placeholder="Enter measure" oninput="convertLand()">
+      </div>
+      <div class="form-group">
+        <label>From Unit</label>
+        <select id="land-unit" class="input-field" onchange="convertLand()">
+          <option value="acre">Acres (ఎకరాలు)</option>
+          <option value="guntha">Gunthas (గుంటలు - TG)</option>
+          <option value="cent">Cents (సెంట్లు - AP)</option>
+          <option value="gajam">Gajalu / Sq Yards (గజాలు)</option>
+          <option value="sqft">Square Feet</option>
+        </select>
+      </div>
+
+      <div id="land-result" class="result-box">
+        <div class="res-row"><span class="res-label">Acres:</span><span id="res-acres" class="res-val">-</span></div>
+        <div class="res-row"><span class="res-label">Gunthas (TG):</span><span id="res-gunthas" class="res-val">-</span></div>
+        <div class="res-row"><span class="res-label">Cents (AP):</span><span id="res-cents" class="res-val">-</span></div>
+        <div class="res-row"><span class="res-label">Gajalu (Sq Yards):</span><span id="res-gajalu" class="res-val highlight">-</span></div>
+        <div class="res-row"><span class="res-label">Square Feet:</span><span id="res-sqft" class="res-val">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 5: AGE CALC -->
+  <div id="view-age" class="module-view">
+    <div class="card">
+      <div class="card-title">
+        <span>Age & Birthday Calculator</span>
+        <span class="jj-badge" style="font-size:10px;">JJ</span>
+      </div>
+      <div class="form-group">
+        <label>Date of Birth (పుట్టిన తేదీ)</label>
+        <input type="date" id="dob" class="input-field">
+      </div>
+      <button class="calc-action-btn" onclick="calculateAge()">Calculate Exact Age</button>
+
+      <div id="age-result" class="result-box" style="display:none;">
+        <div class="res-row"><span class="res-label">Exact Age:</span><span id="res-age-full" class="res-val highlight">-</span></div>
+        <div class="res-row"><span class="res-label">Next Birthday In:</span><span id="res-age-next" class="res-val">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab('basic')">
+      <span class="nav-icon">🔢</span>
+      <span>Basic</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('vaddi')">
+      <span class="nav-icon">🪙</span>
+      <span>వడ్డీ</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('emi')">
+      <span class="nav-icon">🏦</span>
+      <span>EMI</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('land')">
+      <span class="nav-icon">📐</span>
+      <span>భూమి</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('age')">
+      <span class="nav-icon">🎂</span>
+      <span>Age</span>
+    </button>
+  </nav>
+
+  <script>
+    // Tab Switching
+    function switchTab(id) {
+      document.querySelectorAll('.module-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + id).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    // Basic Calculator
+    let currentInput = "0";
+    let historyText = "";
+    
+    function updateCalcScreen() {
+      document.getElementById('calc-main').innerText = currentInput;
+      document.getElementById('calc-history').innerText = historyText;
+    }
+
+    function pressNum(n) {
+      if (currentInput === "0" && n !== ".") currentInput = n;
+      else if (n === "." && currentInput.includes(".")) return;
+      else currentInput += n;
+      updateCalcScreen();
+    }
+
+    function pressOp(op) {
+      historyText = currentInput + " " + op;
+      currentInput = "0";
+      updateCalcScreen();
+    }
+
+    function clearCalc() {
+      currentInput = "0";
+      historyText = "";
+      updateCalcScreen();
+    }
+
+    function backspaceCalc() {
+      if (currentInput.length > 1) {
+        currentInput = currentInput.slice(0, -1);
+      } else {
+        currentInput = "0";
+      }
+      updateCalcScreen();
+    }
+
+    function calcEquals() {
+      if (!historyText) return;
+      try {
+        let fullExpr = historyText + " " + currentInput;
+        let sanitized = fullExpr.replace(/×/g, "*").replace(/−/g, "-").replace(/÷/g, "/");
+        let res = Function('"use strict";return (' + sanitized + ')')();
+        historyText = fullExpr + " =";
+        currentInput = String(Number(res.toFixed(6)));
+      } catch (e) {
+        currentInput = "Error";
+      }
+      updateCalcScreen();
+    }
+
+    // Telugu Vaddi
+    function calculateVaddi() {
+      let p = parseFloat(document.getElementById('vaddi-asalu').value);
+      let r = parseFloat(document.getElementById('vaddi-rate').value);
+      let d1 = new Date(document.getElementById('vaddi-start').value);
+      let d2 = new Date(document.getElementById('vaddi-end').value);
+      if (!p || !r || isNaN(d1) || isNaN(d2) || d2 <= d1) {
+        alert("దయచేసి వివరాలన్నీ సరిగ్గా ఎంటర్ చేయండి");
+        return;
+      }
+      let diffDays = Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+      let months = Math.floor(diffDays / 30);
+      let remDays = diffDays % 30;
+      let totalMonths = diffDays / 30;
+      let interest = (p * r * totalMonths) / 100;
+      
+      document.getElementById('res-vaddi-time').innerText = months + " నెలల " + remDays + " రోజులు (" + diffDays + " days)";
+      document.getElementById('res-vaddi-interest').innerText = "₹" + Math.round(interest).toLocaleString('en-IN');
+      document.getElementById('res-vaddi-total').innerText = "₹" + Math.round(p + interest).toLocaleString('en-IN');
+      document.getElementById('vaddi-result').style.display = 'block';
+    }
+
+    // EMI
+    function calculateEMI() {
+      let p = parseFloat(document.getElementById('emi-amount').value);
+      let annualR = parseFloat(document.getElementById('emi-rate').value);
+      let y = parseFloat(document.getElementById('emi-years').value);
+      if (!p || !annualR || !y) return;
+      let r = (annualR / 12) / 100;
+      let n = y * 12;
+      let emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+      let total = emi * n;
+      document.getElementById('res-emi-monthly').innerText = "₹" + Math.round(emi).toLocaleString('en-IN');
+      document.getElementById('res-emi-interest').innerText = "₹" + Math.round(total - p).toLocaleString('en-IN');
+      document.getElementById('res-emi-total').innerText = "₹" + Math.round(total).toLocaleString('en-IN');
+      document.getElementById('emi-result').style.display = 'block';
+    }
+
+    // Land Converter
+    function convertLand() {
+      let val = parseFloat(document.getElementById('land-val').value) || 0;
+      let unit = document.getElementById('land-unit').value;
+      let sqYards = 0;
+      if (unit === 'acre') sqYards = val * 4840;
+      else if (unit === 'guntha') sqYards = val * 121;
+      else if (unit === 'cent') sqYards = val * 48.4;
+      else if (unit === 'gajam') sqYards = val;
+      else if (unit === 'sqft') sqYards = val / 9;
+
+      document.getElementById('res-acres').innerText = (sqYards / 4840).toFixed(4);
+      document.getElementById('res-gunthas').innerText = (sqYards / 121).toFixed(2);
+      document.getElementById('res-cents').innerText = (sqYards / 48.4).toFixed(2);
+      document.getElementById('res-gajalu').innerText = Math.round(sqYards).toLocaleString('en-IN');
+      document.getElementById('res-sqft').innerText = Math.round(sqYards * 9).toLocaleString('en-IN');
+    }
+
+    // Age
+    function calculateAge() {
+      let dobVal = document.getElementById('dob').value;
+      if (!dobVal) return;
+      let bday = new Date(dobVal);
+      let now = new Date();
+      let y = now.getFullYear() - bday.getFullYear();
+      let m = now.getMonth() - bday.getMonth();
+      let d = now.getDate() - bday.getDate();
+      if (d < 0) { m--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+      if (m < 0) { y--; m += 12; }
+      
+      let nextBday = new Date(now.getFullYear(), bday.getMonth(), bday.getDate());
+      if (nextBday < now) nextBday.setFullYear(now.getFullYear() + 1);
+      let nextDays = Math.ceil((nextBday - now) / (1000 * 60 * 60 * 24));
+
+      document.getElementById('res-age-full').innerText = y + " Years, " + m + " Months, " + d + " Days";
+      document.getElementById('res-age-next').innerText = nextDays + " days remaining";
+      document.getElementById('age-result').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
